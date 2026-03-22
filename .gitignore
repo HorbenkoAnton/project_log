@@ -1,0 +1,17 @@
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+venv/
+env/
+.venv/
+
+.docker_data/
+
+.env
+config_local.yaml
+my_passwords.txt
+
+.DS_Store
+Thumbs.db
