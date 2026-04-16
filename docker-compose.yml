@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    container_name: running_log_app
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    # This allows the container to keep stdin open for the pipe
+    stdin_open: true
+    tty: true
+    command: >
+      sh -c "python producer.py | python src/main.py"
+
+networks:
+  default:
+    name: log_net
