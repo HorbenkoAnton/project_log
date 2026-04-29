@@ -39,7 +39,17 @@ import random
 
 def generate_test_logs():
     services = ["auth-service", "api-gateway"]
-    
+    levels = ["ERROR", "WARN", "INFO", "DEBUG"]
+    services = ["auth-service", "db-cluster-01", "api-gateway"]
+    messages = [
+        "Connection refused by database",
+        "Unauthorized access attempt",
+        "Memory limit reached",
+        "Disk I/O latency high",
+        "Invalid API key provided"
+    ]
+
+
     while True:
         # 1. Randomly decide if this log will be "Good" or "Bad"
         is_valid = random.choice([True, False])
@@ -48,9 +58,9 @@ def generate_test_logs():
             # Matches your LogEntry schema
             log = {
                 "timestamp": time.time(),
-                "level": "ERROR",
+                "level": random.choice(levels),
                 "service": random.choice(services),
-                "message": "Valid test log entry"
+                "message": random.choice(messages)
             }
         else:
             # 2. Generate a "Bad" log (Missing fields or wrong types)
@@ -71,7 +81,7 @@ def generate_test_logs():
         sys.stdout.write(output + "\n")
         sys.stdout.flush() 
         
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 if __name__ == "__main__":
     generate_test_logs()

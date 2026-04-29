@@ -1,0 +1,5 @@
+for MVP used only buffer, because engine logic won't be complicated,cause it will only sort the same errors
+
+so later status giver and filter should be implemented in buffer, and similar errors searcher should be implemented in engine
+
+also later config file would be good to set up status giver and filter parametrs
