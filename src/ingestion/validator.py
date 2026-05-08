@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 from pydantic import ValidationError
-from src.core.models import LogEntry
+from src.models.models import LogEntry
 
 def validate_log(raw_line: str) -> Tuple[Optional[LogEntry], bool]:
     """

@@ -1,0 +1,6 @@
+
+also later config file would be good to set up status giver and filter parametrs
+
+Fix Async Blocking in stream.py: Replace the synchronous for line in sys.stdin with aioconsole.ainput or wrap the existing generator in loop.run_in_executor to prevent the entire event loop from hanging.
+
+grouper.py?

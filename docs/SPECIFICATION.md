@@ -32,12 +32,14 @@ The application follows a pipeline-based architecture:
 * Basic time-based delivery limits (Anti-Spam).
 
 ### Should Have (Next Steps)
-* Connection retry logic for the mail server.
+* Grouping of **similar** errors (Fuzzy Matching/Levenshtein).
+* Hybrid method of report trigger( time-based + quantity-based ).
+* Easy to use configuration file
 * In-memory buffering to handle CPU/Network bottlenecks.
-* Configurable aggregation windows (time intervals).
+* Connection retry logic for the mail server.
 
 ### Could Have (Future Enhancements)
-* Grouping of **similar** errors (Fuzzy Matching/Levenshtein).
+* Using FAST API for faster log ingestion
 * Multi-channel notifications (Telegram, Discord, Slack).
 * Simple Web UI for real-time monitoring.
 

@@ -1,33 +1,29 @@
 import asyncio
 from typing import Optional
-from src.core.models import LogEntry
 
 class LogBuffer:
     def __init__(self, max_size: int = 1000):
+        # Stores raw strings from the stream
         self._queue = asyncio.Queue(maxsize=max_size)
         self.dropped_count = 0
 
-    async def push(self, entry: LogEntry) -> None:
+    async def push(self, raw_line: str) -> None:
         """
-        Pushes an entry into the buffer. 
-        If full, it evicts the oldest entry (Circular Logic).
+        Pushes a raw log line into the buffer. 
+        If full, evicts the oldest line to maintain NFR-2.
         """
         if self._queue.full():
             try:
-                # Evict oldest to maintain NFR-2 (Minimal Footprint)
                 self._queue.get_nowait()
                 self.dropped_count += 1
             except asyncio.QueueEmpty:
                 pass
         
-        await self._queue.put(entry)
+        await self._queue.put(raw_line)
 
-    async def pop(self) -> LogEntry:
-        """Pulls the next available entry from the buffer."""
+    async def pop(self) -> str:
+        """Pulls the next raw string for validation and processing."""
         return await self._queue.get()
-
-    def qsize(self) -> int:
-        return self._queue.qsize()
 
     def task_done(self) -> None:
         self._queue.task_done()
