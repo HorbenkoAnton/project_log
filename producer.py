@@ -1,53 +1,36 @@
-import json
-import sys
+import multiprocessing
 import time
+import json
 import random
+import sys
 
-def generate_test_logs():
-    services = ["auth-service", "api-gateway"]
-    levels = ["ERROR", "WARN", "INFO", "DEBUG"]
-    services = ["auth-service", "db-cluster-01", "api-gateway"]
-    messages = [
-        "Connection refused by database",
-        "Unauthorized access attempt",
-        "Memory limit reached",
-        "Disk I/O latency high",
-        "Invalid API key provided"
-    ]
+# --- PRODUCER CONFIG ---
+PRODUCER_PROFILES = {
+    "auth-service": {"delay": 0.005, "error_rate": 0.2, "levels": ["INFO", "WARN", "ERROR"]},
+    "api-gateway":  {"delay": 0.01,  "error_rate": 0.1, "levels": ["DEBUG", "INFO", "WARN"]},
+    "db-cluster":   {"delay": 0.05,  "error_rate": 0.05, "levels": ["INFO", "ERROR"]}
+}
 
-
+def run_producer(name, profile):
+    messages = ["Connection refused", "Unauthorized access", "Memory limit reached", "Disk I/O high"]
     while True:
-        # 1. Randomly decide if this log will be "Good" or "Bad"
-        is_valid = random.choice([True, False])
-        
-        if is_valid:
-            # Matches your LogEntry schema
-            log = {
-                "timestamp": time.time(),
-                "level": random.choice(levels),
-                "service": random.choice(services),
-                "message": random.choice(messages)
-            }
-        else:
-            # 2. Generate a "Bad" log (Missing fields or wrong types)
-            bad_scenarios = [
-                {"msg": "Missing level and timestamp"}, # Missing keys
-                {"level": 123, "message": "Wrong type for level"}, # Type error
-                "This is not even JSON", # Structural error
-                {"level": "WARN", "message": "Missing service"} # Schema violation
-            ]
-            log = random.choice(bad_scenarios)
-
-        # 3. Stream out
-        if isinstance(log, dict):
-            output = json.dumps(log)
-        else:
-            output = log # Send raw string for "This is not even JSON" case
-            
-        sys.stdout.write(output + "\n")
-        sys.stdout.flush() 
-        
-        time.sleep(1)
+        log = {
+            "timestamp": time.time(),
+            "level": random.choice(profile["levels"]),
+            "service": name,
+            "message": random.choice(messages),
+            #"request_id": f"REQ-{random.randint(1000, 9999)}" # To test ID ignoring later
+        }
+        sys.stdout.write(json.dumps(log) + "\n")
+        sys.stdout.flush()
+        time.sleep(profile["delay"])
 
 if __name__ == "__main__":
-    generate_test_logs()
+    processes = []
+    for name, profile in PRODUCER_PROFILES.items():
+        p = multiprocessing.Process(target=run_producer, args=(name, profile))
+        p.start()
+        processes.append(p)
+    
+    for p in processes:
+        p.join()

@@ -1,14 +1,19 @@
 import os
 
 # --- Ingestion & Buffer ---
-BUFFER_SIZE = 10
+BUFFER_SIZE = 1000
 
-# --- Producer ---
-LOG_INTERVAL = 1
-
-# --- Aggregator ---
-REPORTING_INTERVAL = 300 
-# Exact Match grouping keys
+# --- Aggregation ---
 GROUPING_KEYS = ["service", "level", "message"]
-# Levels that trigger an entry in the final report
-REPORT_LEVELS = ["ERROR", "WARN"]   
+REPORT_LEVELS = ["ERROR", "WARN"]
+
+# --- Notification ---
+NOTIFICATION_COOLDOWN = 300
+
+# --- SMTP Config ---
+SMTP_SERVER = "sandbox.smtp.mailtrap.io" 
+SMTP_PORT = 587
+SMTP_USERNAME = "d21784593bab57"
+SMTP_PASSWORD = "09447f1699a15a"
+SENDER_EMAIL = "sender@example.com"
+RECEIVER_EMAIL = "receiver@example.com"

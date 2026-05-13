@@ -5,6 +5,7 @@ class AggregationEngine:
     def __init__(self):
         # Key: (service, level, message)
         self.registry: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+        self.total_processed = 0
 
     def process(self, entry: LogEntry) -> Tuple[str, str, str]:
         sig = (entry.service, entry.level, entry.message)
@@ -18,7 +19,7 @@ class AggregationEngine:
         else:
             self.registry[sig]["count"] += 1
             self.registry[sig]["sample"] = entry 
-            
+        self.total_processed += 1
         return sig
 
     def flush_report(self) -> Dict[Tuple[str, str, str], Dict[str, Any]]:

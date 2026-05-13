@@ -1,55 +1,98 @@
 import asyncio
+import sys
+from notification.notification_controller import NotificationController
+import src.config as config
 from src.ingestion.stream import get_stream
 from src.ingestion.validator import validate_log
 from src.buffer.buffer import LogBuffer
 from src.engine.aggregator import AggregationEngine
-import src.config as config
+from reporting.reporter import Reporter
 
-# Configuration for Burst Testing
-BUFFER_SIZE = 10
-buffer = LogBuffer(max_size=config.BUFFER_SIZE)
-engine = AggregationEngine()
-
-
-async def ingestor_task():
-    print(f"--- Ingestor: Filling buffer (Target: {config.BUFFER_SIZE}) ---", flush=True)
+async def ingestor_task(buffer: LogBuffer):
+    """Reads raw lines and pushes immediately to the buffer."""
     loop = asyncio.get_running_loop()
     
-    # We run the blocking generator in a separate thread so the loop can breathe
     def threaded_stream():
+        # Producer -> stdin -> get_stream
         for raw_line in get_stream():
-            print("line: " + raw_line + " is added to buffer")
+            # Offload raw string to buffer
             asyncio.run_coroutine_threadsafe(buffer.push(raw_line), loop)
-            
-            
+            #print(f"Buffer size: {buffer._queue.qsize()}", end="\n", flush=True)
 
     await loop.run_in_executor(None, threaded_stream)
 
-    
-async def worker_task():
-    """Pulls from buffer, validates, and aggregates."""
+async def worker_task(buffer: LogBuffer, engine: AggregationEngine):
+    """Pulls raw data from buffer, validates, and aggregates."""
+    print("--- Worker: Processing logs ---", flush=True)
     while True:
         raw_line = await buffer.pop()
-
-        # Step 2 & 3: Validate and then Process
+        
+        # Validation happens here to keep ingestor non-blocking
         entry, success = validate_log(raw_line)
         
         if success and entry:
             engine.process(entry)
-            print("entry: " + str(entry) + " is processed by engine")        
+            #print(f"Processed: {entry.message}") 
+        
         buffer.task_done()
 
+async def reporter_task(engine: AggregationEngine, reporter: Reporter):
+    # Initialize the controller
+    notifier = NotificationController()
+    
+    while True:
+        # Check the engine frequently (e.g., every 10s)
+        await asyncio.sleep(10)
+        
+        # We only flush if we are actually ready to send, 
+        # OR we flush to clear memory but only notify if should_send is True.
+        # For MVP: Flush only when cooldown is over.
+        
+        if notifier.should_send(engine.registry):
+            report_data = engine.flush_report()
+            
+            if report_data:
+                print("--- Notification: Cooldown passed. Sending... ---", flush=True)
+                loop = asyncio.get_running_loop()
+                # Run SMTP in thread to avoid blocking loop
+                await loop.run_in_executor(None, reporter.send_report, report_data)
+                
+                # Update cooldown timer
+                notifier.mark_sent()
+        else:
+            # Optional: Log that we are skipping due to cooldown
+            pass
 
+async def monitor_task(engine: AggregationEngine):
+    """Prints processing stats every 5 seconds."""
+    last_count = 0
+    while True:
+        await asyncio.sleep(5)
+        
+        current_count = engine.total_processed
+        delta = current_count - last_count
+        logs_per_sec = delta / 5
+        
+        print(f"--- Stats: {current_count} total logs | {logs_per_sec:.2f} logs/sec ---", flush=True)
+        last_count = current_count
 
 async def main():
-    print(f"--- APP STARTING ---", flush=True)
+    print("--- APP STARTING ---", flush=True)
+    
+    # Initialization inside main to prevent import side-effects
+    shared_buffer = LogBuffer(max_size=config.BUFFER_SIZE)
+    shared_engine = AggregationEngine()
+    shared_reporter = Reporter()
+
     try:
         await asyncio.gather(
-            ingestor_task(), 
-            worker_task()
+            ingestor_task(shared_buffer),
+            worker_task(shared_buffer, shared_engine),
+            reporter_task(shared_engine, shared_reporter),
+            monitor_task(shared_engine)
         )
     except Exception as e:
-        print(f"CRITICAL CRASH: {e}", flush=True)
+        sys.stderr.write(f"CRITICAL CRASH: {e}\n")
 
 if __name__ == "__main__":
     asyncio.run(main())

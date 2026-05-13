@@ -25,16 +25,16 @@ The application follows a pipeline-based architecture:
 ## 5. Feature Prioritization (MoSCoW)
 
 ### Must Have (MVP)
-* Ingesting logs in JSON format.
-* Structural validation of log entries.
-* Grouping of **identical** error messages (Exact Match).
-* Dispatching summary reports via SMTP.
-* Basic time-based delivery limits (Anti-Spam).
+* Ingesting logs in JSON format. done!
+* Structural validation of log entries.done!
+* Grouping of **identical** error messages (Exact Match). done!
+* Dispatching summary reports via SMTP. done!
+* Basic time-based delivery limits (Anti-Spam). done!
 
 ### Should Have (Next Steps)
 * Grouping of **similar** errors (Fuzzy Matching/Levenshtein).
 * Hybrid method of report trigger( time-based + quantity-based ).
-* Easy to use configuration file
+* Easy to use configuration file done!
 * In-memory buffering to handle CPU/Network bottlenecks.
 * Connection retry logic for the mail server.
 
