@@ -32,7 +32,7 @@ The application follows a pipeline-based architecture:
 * Basic time-based delivery limits (Anti-Spam). done!
 
 ### Should Have (Next Steps)
-* Grouping of **similar** errors (Fuzzy Matching/Levenshtein).
+* Grouping of **similar** errors (Fuzzy Matching/Levenshtein). done!
 * Hybrid method of report trigger( time-based + quantity-based ).
 * Easy to use configuration file done!
 * In-memory buffering to handle CPU/Network bottlenecks.

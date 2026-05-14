@@ -81,7 +81,7 @@ async def main():
     
     # Initialization inside main to prevent import side-effects
     shared_buffer = LogBuffer(max_size=config.BUFFER_SIZE)
-    shared_engine = AggregationEngine()
+    shared_engine = AggregationEngine(mask_ids=config.MASK_IDS)
     shared_reporter = Reporter()
 
     try:

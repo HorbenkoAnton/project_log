@@ -1,14 +1,18 @@
 import os
 
 # --- Ingestion & Buffer ---
-BUFFER_SIZE = 1000
+BUFFER_SIZE = 2000
 
 # --- Aggregation ---
-GROUPING_KEYS = ["service", "level", "message"]
-REPORT_LEVELS = ["ERROR", "WARN"]
+MASK_IDS = True
+# Options: "service", "level", "message"
+# If "level" is removed, the same message across ERROR and WARN and etc will be grouped together.
+SIGNATURE_COMPONENTS = ["service","level" ,"message"]
 
 # --- Notification ---
-NOTIFICATION_COOLDOWN = 300
+NOTIFICATION_MIN_THRESHOLD = 1000    # Don't bother me for less than 1000 logs
+NOTIFICATION_MAX_THRESHOLD = 50000   # Critical mass: send regardless of timer
+NOTIFICATION_COOLDOWN = 300          # Base time between reports
 
 # --- SMTP Config ---
 SMTP_SERVER = "sandbox.smtp.mailtrap.io" 
