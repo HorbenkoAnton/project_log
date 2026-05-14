@@ -8,15 +8,15 @@ import uuid
 # --- PRODUCER CONFIG ---
 PRODUCER_PROFILES = {
     # Existing "Generic" behavior
-    "auth-service": {"delay": 0.005, "mode": "generic", "levels": ["CRITICAL", "INFO", "WARN", "ERROR"]},
+    "auth-service": {"delay": 0.009, "mode": "generic", "levels": ["CRITICAL", "INFO", "WARN", "ERROR"]},
     "api-gateway":  {"delay": 0.01,  "mode": "generic", "levels": ["DEBUG", "INFO", "WARN"]},
     "db-service":   {"delay": 0.007, "mode": "generic", "levels": ["ERROR", "WARN","CRITICAL"]},
     
     # Specific Masking Tests
-    "id-service":    {"delay": 0.002, "mode": "id",      "levels": ["ERROR"]},
-    "net-service":   {"delay": 0.005, "mode": "ip",      "levels": ["INFO"]},
-    "txn-service":   {"delay": 0.003, "mode": "uuid",    "levels": ["WARN"]},
-    "pointer-service":{"delay": 0.004, "mode": "hex",     "levels": ["ERROR", "WARN"]}
+    # "id-service":    {"delay": 0.002, "mode": "id",      "levels": ["ERROR"]},
+    # "net-service":   {"delay": 0.005, "mode": "ip",      "levels": ["INFO"]},
+    # "txn-service":   {"delay": 0.003, "mode": "uuid",    "levels": ["WARN"]},
+    # "pointer-service":{"delay": 0.004, "mode": "hex",     "levels": ["ERROR", "WARN"]}
 }
 
 def generate_noise(mode):
@@ -63,6 +63,7 @@ def run_producer(name, profile):
             "message": msg
         }
         
+        #print(json.dumps(log))
         sys.stdout.write(json.dumps(log) + "\n")
         sys.stdout.flush()
         time.sleep(profile["delay"])

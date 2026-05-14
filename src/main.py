@@ -37,31 +37,22 @@ async def worker_task(buffer: LogBuffer, engine: AggregationEngine):
         buffer.task_done()
 
 async def reporter_task(engine: AggregationEngine, reporter: Reporter):
-    # Initialize the controller
-    notifier = NotificationController()
+    controller = NotificationController()
     
     while True:
-        # Check the engine frequently (e.g., every 10s)
-        await asyncio.sleep(10)
+        await asyncio.sleep(5)
         
-        # We only flush if we are actually ready to send, 
-        # OR we flush to clear memory but only notify if should_send is True.
-        # For MVP: Flush only when cooldown is over.
+        should_send, trigger = controller.check_trigger(
+            engine.total_processed, 
+            len(engine.registry)
+        )
         
-        if notifier.should_send(engine.registry):
+        if should_send:
             report_data = engine.flush_report()
-            
             if report_data:
-                print("--- Notification: Cooldown passed. Sending... ---", flush=True)
                 loop = asyncio.get_running_loop()
-                # Run SMTP in thread to avoid blocking loop
                 await loop.run_in_executor(None, reporter.send_report, report_data)
-                
-                # Update cooldown timer
-                notifier.mark_sent()
-        else:
-            # Optional: Log that we are skipping due to cooldown
-            pass
+                controller.mark_sent(engine.total_processed, trigger)
 
 async def monitor_task(engine: AggregationEngine):
     """Prints processing stats every 5 seconds."""
@@ -75,6 +66,7 @@ async def monitor_task(engine: AggregationEngine):
         
         print(f"--- Stats: {current_count} total logs | {logs_per_sec:.2f} logs/sec ---", flush=True)
         last_count = current_count
+
 
 async def main():
     print("--- APP STARTING ---", flush=True)

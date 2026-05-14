@@ -33,7 +33,7 @@ The application follows a pipeline-based architecture:
 
 ### Should Have (Next Steps)
 * Grouping of **similar** errors (Fuzzy Matching/Levenshtein). done!
-* Hybrid method of report trigger( time-based + quantity-based ).
+* Hybrid method of report trigger( time-based + quantity-based ). done!
 * Easy to use configuration file done!
 * In-memory buffering to handle CPU/Network bottlenecks.
 * Connection retry logic for the mail server.

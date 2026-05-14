@@ -1,7 +1,7 @@
 import os
 
 # --- Ingestion & Buffer ---
-BUFFER_SIZE = 2000
+BUFFER_SIZE = 50000
 
 # --- Aggregation ---
 MASK_IDS = True
